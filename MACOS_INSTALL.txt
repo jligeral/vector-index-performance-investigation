@@ -1,0 +1,100 @@
+Installing Requirements on macOS
+=================================
+
+These instructions cover macOS with Apple Silicon (arm64). The packages in
+requirements.txt include C++ extensions that require extra setup steps.
+
+
+Prerequisites
+-------------
+Xcode Command Line Tools must be installed:
+
+    xcode-select --install
+
+If already installed but you're seeing compiler errors, reset it:
+
+    sudo xcode-select --reset
+
+
+The Core Problem (macOS 26+ / Apple Clang 17+)
+-----------------------------------------------
+On macOS 26 (Tahoe) and later, the C++ standard library headers in the
+Command Line Tools installation are incomplete. The full headers live inside
+a versioned SDK, so you must point the compiler there explicitly.
+
+Find your available SDKs:
+
+    ls /Library/Developer/CommandLineTools/SDKs/
+
+You need one with a complete c++/v1 directory. MacOSX15.4.sdk is known to
+work. Verify it has the headers:
+
+    ls /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/stdexcept
+
+If the file exists, you are good to proceed.
+
+
+Installing falconn
+------------------
+falconn==1.3.1 cannot be installed directly via pip on Apple Clang 17+
+because its bundled Eigen library (3.3.x) has a bug that triggers a
+compiler error:
+
+    no member named 'derived' in 'Transpose<TranspositionsBase<...>>'
+
+You must download the source, patch it, and install from the patched copy.
+
+Step 1 - Download the source tarball to a temporary directory:
+
+    pip download falconn==1.3.1 --no-deps -d /tmp
+
+Step 2 - Extract it:
+
+    cd /tmp && tar xzf FALCONN-1.3.1.tar.gz
+
+Step 3 - Patch the Eigen bug (changes trt.derived() to trt on line 387):
+
+    sed -i '' 's/matrix\.derived(), trt\.derived()/matrix.derived(), trt/' \
+        /tmp/FALCONN-1.3.1/external/eigen/Eigen/src/Core/Transpositions.h
+
+Step 4 - Install from the patched source, pointing to a complete SDK:
+
+    SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk
+    CXXFLAGS="-I$SDK/usr/include/c++/v1" ARCHFLAGS="-arch arm64" \
+        pip install /tmp/FALCONN-1.3.1/
+
+
+Installing the remaining packages
+----------------------------------
+faiss-cpu and numpy have pre-built arm64 wheels and install normally.
+The CXXFLAGS export below is included for safety in case any fallback
+compilation is triggered:
+
+    SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk
+    CXXFLAGS="-I$SDK/usr/include/c++/v1" ARCHFLAGS="-arch arm64" \
+        pip install faiss-cpu numpy
+
+
+Putting it all together
+------------------------
+After completing the falconn steps above, run:
+
+    SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk
+    CXXFLAGS="-I$SDK/usr/include/c++/v1" ARCHFLAGS="-arch arm64" \
+        pip install -r requirements.txt
+
+pip will skip falconn since it is already installed and proceed with the rest.
+
+
+Troubleshooting
+---------------
+"fatal error: 'stdexcept' file not found"
+    The SDK path is wrong or the SDK does not contain C++ headers.
+    Run: ls /Library/Developer/CommandLineTools/SDKs/
+    and substitute a SDK version that has usr/include/c++/v1/stdexcept.
+
+"no member named 'derived' in 'Transpose<TranspositionsBase<...>>'"
+    The Eigen patch was not applied. Repeat steps 3-4 above.
+
+"xcode-select: error: tool 'xcode-select' requires Xcode"
+    Install Xcode Command Line Tools: xcode-select --install
