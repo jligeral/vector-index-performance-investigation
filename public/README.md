@@ -1,0 +1,20 @@
+## Project: Vector Index Performance Investigation 
+1. The `initial_code.ipynb` includes implementations for brute force, clustering, graph and LSH based index, with code to measure the building and searching time. Your task is to write the code for computing search quality, then conduct evaluation. Please use Python 3.10 or before, otherwise you cannot install some required libraries. The `requirements.txt` includes all necessary libraries to run the code, you need to install them. The `word2vec_sample_150000.npy` is a sample dataset to demonstrate the initial code. 
+
+### Your task
+1. First, you need to write the code to compute the **precision** and **recall** of the top-k results. 
+Specifically, using the brute force results as the groundtruth, you will be able to calculate the true positive (TP), true negative (TN), false positive (FP) and false negative (FN) for the results of each index search. Then you can use them to further calculate the precision and recall.
+
+2. With the quality and time metrics above, you need to further evaluate factors that may impact the index performance (quality & time):
+   (1) For each index, how data distribution, data scale and dimension impact the performance. For this, you need to find more datasets. See the references. 
+   (2) For each index, how the distance metric impacts the performance, i.e., comparing performance when using Euclidean distance VS cosine distance. 
+   (3) For each index, vary the parameters and see how its performance varies. 
+   (4) Compare the performance of different indexes (Graph VS Clustering VS LSH) on the same datasets, see how data distribution/scale/dimension impact the comparison.  
+   **Note**: for each point above, you should not only report the evaluation results, but also analyze why. 
+
+3. Propose a few potential research directions, the reasons to choose them, and your solutions (no need to be implemented).  
+
+### References: use them to understand the codebase and further develop it.
+   (1) FAISS library: https://github.com/facebookresearch/faiss/wiki
+   (2) FALCONN library: https://github.com/FALCONN-LIB/FALCONN
+   (3) You can find more datasets from https://github.com/erikbern/ann-benchmarks
