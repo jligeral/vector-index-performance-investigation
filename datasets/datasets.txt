@@ -1,0 +1,91 @@
+Datasets for Vector Index Performance Evaluation
+=================================================
+
+Source: https://github.com/erikbern/ann-benchmarks
+Format: HDF5 (.hdf5). Each file contains:
+  - train: the corpus vectors used to build the index
+  - test:  query vectors
+  - neighbors: ground-truth top-100 neighbor indices for each query (Euclidean or angular)
+  - distances: corresponding distances
+
+Download command (example):
+  wget http://ann-benchmarks.com/<filename> -P datasets/
+
+-------------------------------------------------
+word2vec_sample_150000.npy  [already present]
+-------------------------------------------------
+  Size      : 150,000 vectors
+  Dimension : 300
+  Distance  : Cosine (inner product on normalized vectors)
+  Domain    : Text (Google News word embeddings)
+  Role      : Baseline dataset; used for initial code and parameter tuning.
+
+-------------------------------------------------
+glove-25-angular.hdf5
+-------------------------------------------------
+  Size      : ~1,183,514 vectors (subsample as needed)
+  Dimension : 25
+  Distance  : Angular (cosine)
+  Domain    : Text (GloVe word embeddings trained on Twitter)
+  Download  : wget http://ann-benchmarks.com/glove-25-angular.hdf5 -P datasets/
+  Role      : Low-dimensionality comparison. Same cosine distance and text domain
+              as word2vec, so changes in performance isolate the effect of dimension.
+
+-------------------------------------------------
+deep-image-96-angular.hdf5
+-------------------------------------------------
+  Size      : 9,990,000 vectors
+  Dimension : 96
+  Distance  : Angular (cosine)
+  Domain    : Image (deep learning features from a neural network)
+  Download  : curl -O http://ann-benchmarks.com/deep-image-96-angular.hdf5
+  Role      : Large-scale experiment (~10M vectors). Closest to real production
+              scale on this machine. Uses pre-computed HDF5 ground truth to avoid
+              brute-force at 10M. Different distribution from SIFT (neural features
+              vs. hand-crafted descriptors) and different metric (cosine vs. Euclidean).
+
+-------------------------------------------------
+glove-50-angular.hdf5
+-------------------------------------------------
+  Size      : ~1,183,514 vectors (subsample as needed)
+  Dimension : 50
+  Distance  : Angular (cosine)
+  Domain    : Text (GloVe word embeddings trained on Twitter)
+  Download  : curl -O http://ann-benchmarks.com/glove-50-angular.hdf5
+  Role      : Mid-point in GloVe dimensionality sweep (25 / 50 / 100-dim).
+              Same source and metric as GloVe-25 and GloVe-100 — isolates
+              the effect of dimension with all other variables held constant.
+
+-------------------------------------------------
+glove-100-angular.hdf5
+-------------------------------------------------
+  Size      : ~1,183,514 vectors (subsample as needed)
+  Dimension : 100
+  Distance  : Angular (cosine)
+  Domain    : Text (GloVe word embeddings trained on Twitter)
+  Download  : curl -O http://ann-benchmarks.com/glove-100-angular.hdf5
+  Role      : High end of GloVe dimensionality sweep (25 / 50 / 100-dim).
+
+-------------------------------------------------
+fashion-mnist-784-euclidean.hdf5
+-------------------------------------------------
+  Size      : 60,000 vectors
+  Dimension : 784
+  Distance  : Euclidean
+  Domain    : Image (Fashion-MNIST pixel vectors)
+  Download  : wget http://ann-benchmarks.com/fashion-mnist-784-euclidean.hdf5 -P datasets/
+  Role      : High-dimensionality and small-scale comparison. Tests how indexes
+              degrade under the curse of dimensionality; also uses Euclidean
+              distance and a non-text distribution.
+
+-------------------------------------------------
+sift-128-euclidean.hdf5
+-------------------------------------------------
+  Size      : 1,000,000 vectors (subsample to 150K / 500K / 1M to test scale)
+  Dimension : 128
+  Distance  : Euclidean
+  Domain    : Image (SIFT local feature descriptors)
+  Download  : wget http://ann-benchmarks.com/sift-128-euclidean.hdf5 -P datasets/
+  Role      : Large-scale and different-distribution comparison. SIFT descriptors
+              have a more uniform, clustered structure than text embeddings.
+              Subsampling at multiple sizes directly measures scale effects.
